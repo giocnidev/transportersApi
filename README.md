@@ -23,6 +23,8 @@ o por medio de Visual Studio
 La documentación se desarrollo con la herramienta Swagger y está disponible en el ambiente de desarrollo (local) ingresando a la URL
 * https://localhost:7174/swagger/index.html
 
+De igual forma se entrega la documentación de la api como documento dentro del proyecto
+
 # Pruebas unitarias
 Se realizaron las pruebas unitarias utilizando la herramienta MOQ, para simular los repositorios inyectados en la api
 ![image](https://user-images.githubusercontent.com/68788413/175827019-981b3147-6154-4f82-ac77-246f3732b111.png)
