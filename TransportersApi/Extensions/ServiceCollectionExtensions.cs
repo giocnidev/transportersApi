@@ -10,7 +10,7 @@ namespace TransportersApi.Extensions
     {
         public static IServiceCollection AddDependencyRepositories(this IServiceCollection services) =>
             services
-                .AddDbContext<DbContextRepository>()
+                .AddDbContext<DbContextRepositorySQLite>()
                 .AddTransient<IContainerRepository, ContainerRepositorySQLite>();
 
 

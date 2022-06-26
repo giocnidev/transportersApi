@@ -19,6 +19,40 @@ namespace TransportersApi.Controllers
             _containerBl = containerBl;
         }
 
+        /// <summary>
+        /// Servicio para obtener las estadisticas de los contenedores
+        /// despachados, no despachados y el presupuesto utilizado
+        /// </summary>
+        /// <returns>Return success/fail/error status</returns>
+        /// <remarks>
+        ///     
+        /// **Ejemplo de respuesta 200:**
+        ///
+        ///     {
+        ///           "responseTime": "2022-06-26T11:30:35.1629521-05:00",
+        ///           "timeElapsed": "",
+        ///           "code": 0,
+        ///           "message": "",
+        ///           "data": {
+        ///               "id": "5a132f06-31e5-4d0f-87d8-71e98a483762",
+        ///               "containersDispatched": 46715.86,
+        ///               "containersNotDispatched": 8442.18,
+        ///               "budgetUsed": 6585.49
+        ///           }
+        ///     }
+        ///     
+        /// **Ejemplo de respuesta 500:**
+        ///
+        ///     {
+        ///           "responseTime": "2022-06-26T11:30:35.1629521-05:00",
+        ///           "code": 500,
+        ///           "message": "Error",
+        ///           "data": null
+        ///     }
+        ///
+        /// </remarks>
+        /// <response code="200">Success</response>
+        /// <response code="500">Server error</response>
         [HttpGet("")]
         public ActionResult GetStats()
         {

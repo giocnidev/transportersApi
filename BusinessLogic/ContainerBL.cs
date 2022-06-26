@@ -10,9 +10,19 @@ namespace BusinessLogic
     public class ContainerBL : IContainerBL
     {
         private readonly IContainerRepository _containerRepository;
+        private Dictionary<string, double> budgetDictionary = new();
+        private Dictionary<string, double> kpiDictionary = new();
 
         public ContainerBL(IContainerRepository usersRepository) {
             _containerRepository = usersRepository;
+        }
+
+        private List<QueueDto> InitQueue(int index, ContainerDto container) {
+            QueueDto queue = new(data: new() { container }){
+                Index = index
+            };
+
+            return new() { queue };
         }
 
         public ResponseDto<string?[]> SelectContainers(double budget, List<ContainerDto>? data){
@@ -24,30 +34,44 @@ namespace BusinessLogic
                     return response;
                 }
 
-                double kpi = 0;
+                double bestKpi = 0;
+                double bestBudget = 0;
                 int containerListSize = data.Count;
-                List<ContainerDto> selectedContainers = new List<ContainerDto>();
-                Dictionary<string, double> calculatedBudget = new Dictionary<string, double>();
-                Dictionary<string, double> calculatedKPI = new Dictionary<string, double>();
+                List<ContainerDto> selectedContainers = new();
 
-                for (int index = 0; index < containerListSize - 1; index++) {
+                for (int index = 0; index < containerListSize; index++) {
                     if (data[index].TransportCost > budget) continue;
 
-                    List<ContainerDto> possibleContainers = new List<ContainerDto>() { data[index] };
-                    for (int indexNext = (index + 1); indexNext < containerListSize; indexNext++){
-                        if (data[indexNext].TransportCost > budget) continue;
+                    List<QueueDto> queueList = InitQueue(index, data[index]);
 
-                        possibleContainers.Add(data[indexNext]);
-                        if (GetCalculatedBudget(possibleContainers, calculatedBudget) > budget) {
-                            //se quita el ultimo posible contenedor, ya que se supera el presupuesto
-                            possibleContainers.RemoveAt(possibleContainers.Count - 1);
+                    int indexQueue = 0;
+                    while (indexQueue < queueList.Count) {
+                        QueueDto queueItem = queueList[indexQueue];
+                        int lastIndex = queueItem.Index + 1;
 
-                            double currentKpi = GetCalculatedKPI(possibleContainers, calculatedKPI);
-                            if (currentKpi > kpi) {
-                                kpi = currentKpi;
-                                selectedContainers.Clear();
-                                selectedContainers.AddRange(possibleContainers);
+                        for (int indexNext = lastIndex; indexNext < containerListSize; indexNext++){
+                            if (data[indexNext].TransportCost > budget) continue;
+
+                            List<ContainerDto> possibleContainers = queueItem.Data.Append(data[indexNext]).ToList();
+                            if (GetCalculatedBudget(possibleContainers) <= budget){
+                                queueList.Add(
+                                    new(data: possibleContainers) { 
+                                        Index = indexNext
+                                    }
+                                );
                             }
+                        }
+                        indexQueue++;
+                    }
+
+                    //Buscar en la cola de posibles despachos, con el mejor KPI y menor uso del presupuesto
+                    foreach (QueueDto queueItem in queueList){
+                        double currentKpi = GetCalculatedKPI(queueItem.Data);
+                        double currentBudget = GetCalculatedBudget(queueItem.Data);
+                        if ((currentKpi > bestKpi) || (currentKpi == bestKpi && (currentBudget < bestBudget || bestBudget == 0))){
+                            bestKpi = currentKpi;
+                            bestBudget = currentBudget;
+                            selectedContainers = queueItem.Data;
                         }
                     }
                 }
@@ -59,16 +83,8 @@ namespace BusinessLogic
                     return response;
                 }
 
-                var noSelectedContainers = data.Where(s => selectedContainers.All(ns => ns.Name != s.Name));
-
-                Stats? stats = _containerRepository.GetStats();
-                if (stats == null) {
-                    stats = new Stats();
-                }
-                stats.ContainersNotDispatched += noSelectedContainers.Sum(t => t.ContainerPrice);
-                stats.ContainersDispatched += selectedContainers.Sum(t => t.ContainerPrice);
-                stats.BudgetUsed += selectedContainers.Sum(t => t.TransportCost);
-                _containerRepository.UpdateStats(stats);
+                List<ContainerDto> noSelectedContainers = data.Where(s => selectedContainers.All(ns => ns.Name != s.Name)).ToList();
+                SaveStats(selectedContainers, noSelectedContainers);
 
                 response.Data = selectedContainers.Select(t => t.Name).ToArray();
             }catch (Exception ex) {
@@ -79,6 +95,17 @@ namespace BusinessLogic
             watch.Stop();
             response.TimeElapsed = String.Format("{0} ms", watch.ElapsedMilliseconds);
             return response;
+        }
+
+        private void SaveStats(List<ContainerDto> selectedContainers, List<ContainerDto> noSelectedContainers) {
+            Stats? stats = _containerRepository.GetStats();
+            if (stats == null){
+                stats = new Stats();
+            }
+            stats.ContainersNotDispatched += noSelectedContainers.Sum(t => t.ContainerPrice);
+            stats.ContainersDispatched += selectedContainers.Sum(t => t.ContainerPrice);
+            stats.BudgetUsed += selectedContainers.Sum(t => t.TransportCost);
+            _containerRepository.UpdateStats(stats);
         }
 
         private ResponseDto<string?[]> ValidateSelectContainers(double budget, List<ContainerDto>? data) {
@@ -105,20 +132,20 @@ namespace BusinessLogic
             return String.Join("-", data.Select(t => t.Name));
         }
 
-        private double GetCalculatedBudget(List<ContainerDto> possibleContainers, Dictionary<string, double> calculatedBudget) {
+        private double GetCalculatedBudget(List<ContainerDto> possibleContainers) {
             string key = GenerateKey(possibleContainers);
-            if (!calculatedBudget.TryGetValue(key, out double budgetTotal)){
+            if (!budgetDictionary.TryGetValue(key, out double budgetTotal)){
                 budgetTotal = possibleContainers.Sum(t => t.TransportCost);
-                calculatedBudget.Add(key, budgetTotal);
+                budgetDictionary.Add(key, budgetTotal);
             }
             return budgetTotal;
         }
 
-        private double GetCalculatedKPI(List<ContainerDto> possibleContainers, Dictionary<string, double> calculatedKPI){
+        private double GetCalculatedKPI(List<ContainerDto> possibleContainers){
             string key = GenerateKey(possibleContainers);
-            if (!calculatedKPI.TryGetValue(key, out double kpiTotal)){
+            if (!kpiDictionary.TryGetValue(key, out double kpiTotal)){
                 kpiTotal = possibleContainers.Sum(t => t.ContainerPrice);
-                calculatedKPI.Add(key, kpiTotal);
+                kpiDictionary.Add(key, kpiTotal);
             }
             return kpiTotal;
         }

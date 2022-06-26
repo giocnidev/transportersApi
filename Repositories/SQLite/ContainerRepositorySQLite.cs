@@ -19,7 +19,7 @@ namespace Repositories.SQLite
 
         public bool UpdateStats(Stats stats){
             using var scope = _serviceScope.CreateScope();
-            var context = scope.ServiceProvider.GetRequiredService<DbContextRepository>();
+            var context = scope.ServiceProvider.GetRequiredService<DbContextRepositorySQLite>();
             context.Database.EnsureCreated();
 
             context.Stats.Update(stats);
@@ -30,7 +30,7 @@ namespace Repositories.SQLite
 
         public Stats? GetStats(){
             using var scope = _serviceScope.CreateScope();
-            var context = scope.ServiceProvider.GetRequiredService<DbContextRepository>();
+            var context = scope.ServiceProvider.GetRequiredService<DbContextRepositorySQLite>();
             context.Database.EnsureCreated();
 
             return context.Stats.FirstOrDefault();
