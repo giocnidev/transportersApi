@@ -23,7 +23,9 @@ o por medio de Visual Studio
 La documentación se desarrollo con la herramienta Swagger y está disponible en el ambiente de desarrollo (local) ingresando a la URL
 * https://localhost:7174/swagger/index.html
 
-De igual forma se entrega la documentación de la api como documento dentro del proyecto
+De igual forma se entrega la documentación de la api como documento dentro del proyecto apunando a la nube (AWS).
+La api fue desplegada por medio de Elastic Beanstalk, y el end-point es:
+* http://transportersapi-env.eba-m2gntps4.us-east-1.elasticbeanstalk.com/
 
 # Pruebas unitarias
 Se realizaron las pruebas unitarias utilizando la herramienta MOQ, para simular los repositorios inyectados en la api
