@@ -5,12 +5,16 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace TransportersApi.Controllers
 {
+    /// <summary>
+    /// </summary>
     [ApiController]
     [Route("api/[controller]")]
     public class StatsController: ControllerBase{
         private readonly ILogger<ContainersController> _logger;
         private readonly IContainerBL _containerBl;
 
+        /// <summary>
+        /// </summary>
         public StatsController(
             ILogger<ContainersController> logger,
             IContainerBL containerBl)

@@ -36,7 +36,7 @@ namespace Tests
             string?[] expected = new string?[] { "C1", "C3" };
 
             ResponseDto<string?[]> result = containerBl.SelectContainers(budget, containers);
-            Assert.IsTrue(result.Data.SequenceEqual(expected));
+            Assert.IsTrue(result?.Data?.SequenceEqual(expected));
         }
 
         [TestMethod]
@@ -73,7 +73,7 @@ namespace Tests
             string?[] expected = new string?[] { "C1", "C2", "C4" };
 
             ResponseDto<string?[]> result = containerBl.SelectContainers(budget, containers);
-            Assert.IsTrue(result.Data.SequenceEqual(expected));
+            Assert.IsTrue(result?.Data?.SequenceEqual(expected));
         }
 
         [TestMethod]
@@ -102,7 +102,7 @@ namespace Tests
             string?[] expected = new string?[] { "C2" };
 
             ResponseDto<string?[]> result = containerBl.SelectContainers(budget, containers);
-            Assert.IsTrue(result.Data.SequenceEqual(expected));
+            Assert.IsTrue(result?.Data?.SequenceEqual(expected));
         }
 
         [TestMethod]
@@ -131,7 +131,7 @@ namespace Tests
             string?[] expected = new string?[] { "C2", "C3" };
 
             ResponseDto<string?[]> result = containerBl.SelectContainers(budget, containers);
-            Assert.IsFalse(result.Data.SequenceEqual(expected));
+            Assert.IsFalse(result?.Data?.SequenceEqual(expected));
         }
 
         [TestMethod]
