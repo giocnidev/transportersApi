@@ -56,7 +56,7 @@ namespace TransportersApi.Controllers
         [HttpGet("")]
         public ActionResult GetStats()
         {
-            ResponseDto<Stats> result = _containerBl.GetStats();
+            ResponseDto<StatsDto> result = _containerBl.GetStats();
             return StatusCode(result.StatusCode, result);
         }
 

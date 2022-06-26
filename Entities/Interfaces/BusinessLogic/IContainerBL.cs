@@ -11,6 +11,6 @@ namespace Entities.Interfaces.BusinessLogic
     public interface IContainerBL
     {
         public ResponseDto<string?[]> SelectContainers(double budget, List<ContainerDto>? data);
-        public ResponseDto<Stats> GetStats();
+        public ResponseDto<StatsDto> GetStats();
     }
 }

@@ -150,11 +150,17 @@ namespace BusinessLogic
             return kpiTotal;
         }
 
-        public ResponseDto<Stats> GetStats(){
-            ResponseDto<Stats> response = new ResponseDto<Stats>();
+        public ResponseDto<StatsDto> GetStats(){
+            ResponseDto<StatsDto> response = new ResponseDto<StatsDto>();
             try{
-                response.Data = _containerRepository.GetStats(); ;
-            }catch (Exception ex){
+                Stats? stats = _containerRepository.GetStats();
+                if (stats == null) {
+                    //Se inicializa con valores en 0
+                    stats = new();
+                }
+
+                response.Data = StatsDto.FromEntity(stats);
+            } catch (Exception ex){
                 response.StatusCode = (int)HttpStatusCode.InternalServerError;
                 response.Code = 500;
                 response.Message = "Ups!!, ha ocurrido un error: " + ex.Message;

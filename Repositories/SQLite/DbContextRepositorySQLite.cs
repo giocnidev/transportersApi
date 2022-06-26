@@ -14,7 +14,7 @@ namespace Repositories.SQLite
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder.UseSqlite("Data Source=database.db");
+            optionsBuilder.UseSqlite("Data Source=database_v1.db");
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
